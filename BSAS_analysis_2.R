@@ -190,7 +190,7 @@ for (b in 1:3){
 			bneck_het[b,add,r]<-mean(unlist(summary(BSAS_genind)[6]))
 }	}	}
 #RESULTS: These plots will show the ratio of non bottleneck to bottleneck- we can see it ranges 
-#Thus the bottlenecks are having an effect on genetic diversity, but 
+#Thus the bottlenecks are having an effect on genetic diversity 
 #Explanation is that bottlenecks only cause the loss of (mostly) rare alleles and those are likely
 #below the threshold we are counting
 setwd("/home/user/Dropbox/Projects/IN_PROGRESS/Best_sampling_across_systems/")
@@ -225,10 +225,12 @@ load("all_res_final.Rdata")
 is.na(all_res) <- sapply(all_res, is.infinite)
 means_caught_mim<-round(apply(all_res[,,],c(1,2),mean,na.rm=T),2)
 sim_params_mim<-matrix(unlist(lapply(scenarios_ran,get_params)),ncol=7,byrow=T)
+
+#Recall that the MSS model was only for a subset of parameters, so narrow the data to parameters in common with MIM
 shared_bw<-which(do.call("paste",as.data.frame(sim_params_mim[,c(1,3,5,7)])) %in% do.call("paste",as.data.frame(sim_params_mss[,c(1,3,5,7)])))
 sd_caught_mim<-apply(all_res[shared_bw[1:16],8,],1,sd,na.rm=T)
 	
-	#Analysis
+#Analysis
 diff_mss<-means_caught_mim[shared_bw,c(1,3,8,9)]/means_caught_mss[,c(1,3,8,9)]
 
 colMeans(diff_mss[1:16,]); 
