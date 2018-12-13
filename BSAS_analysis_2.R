@@ -41,9 +41,9 @@ plot(sim_params[,7],means_caught[,2])
 	
 	
 	
-#################################
-#	FIGURE 1 AND SUPP PLOTS		#
-#################################
+#####################################################
+#	FIGURE 1 AND SUPP PLOTS- GRID ALL PARAMS		#
+#####################################################
 	
 #PDFs showing each factor for the four kinds of alleles- will reproduce Figure 1
 
@@ -78,17 +78,37 @@ dev.off()
 
 	
 	
-##############################
-#	CONTROL FOR NUM POPS	 #
-##############################
+##############################################################
+#	POP SIZE AND MIGRATION COMBINED- FIGURE 2				 #
+##############################################################
+
 #The relatively flat boxplots for migration rate and population size suggest that these factors 
 #are dominated by the influence of number of populations which makes sense because the samples are 
 #divided up among the different populations 
 #So we need to parcel out these factors, to see if they have some influence
-#Results are PDFs showing the relationship of minimum sampling to factors of migration rate and population size
-#controlling for number of populations (i.e. there are separate graphs for each number of populations)
-#COULD CHANGE CODE Change the 7 to a 5 to vary by migration rate
-#COULD CHANGE CODE Change the AT for Allele Type (could look at any alleles or catch multiple)
+#The following will go through every combination of migration rate and population size
+	
+sim_params[sim_params[,7]=="50",7]<-"0050";			sim_params[sim_params[,7]=="75",7]<-"0075";		sim_params[sim_params[,7]=="150",7]<-"0150"
+sim_params[sim_params[,7]=="100",7]<-"0100";		sim_params[sim_params[,7]=="200",7]<-"0200";	sim_params[sim_params[,7]=="300",7]<-"0300"
+sim_params[sim_params[,7]=="400",7]<-"0400";		sim_params[sim_params[,7]=="500",7]<-"0500";		
+
+	#This one for publication- colored and focuses on local alleles	
+psize_mig<-paste("p=",sim_params[,7],"  m=0",sim_params[,5],sep="")
+pdf("vary_migr_by_psize.pdf",height=6,width=13)
+par(mar=c(10,5,3,2))
+AT<-8; boxplot(means_caught[,AT]~psize_mig,las=2,col=c(rep("light grey",7),rep("white",7)),ylab="Nt, number of samples needed per population")
+dev.off()
+	
+	#This one NOT for publication	
+sim_params_temp<-cbind(sim_params,paste(sim_params[,5],sim_params[,7],sep="-"))
+pdf("vary_psize_by_migr.pdf",height=7,width=15)
+for (AT in c(1,2,3,4,8,9)) boxplot(means_caught[,AT]~sim_params_temp[,8],las=2,main=allele_categories[AT])
+dev.off()
+
+	#This one NOT for publication	
+	#The following focus on number of populations (i.e. there are separate graphs for each number of populations)
+#Change the 7 to a 5 to vary by migration rate
+#Change the AT for Allele Type (could look at any alleles or catch multiple)
 
 pdf(file="BSAS_grid_final_psize.pdf", height=12, width=18)
 par(mfcol=c(4,7), mar=c(2,2,2,2), oma=c(4,4,4,4))
@@ -101,19 +121,16 @@ for (nump in num_pops_char)		for (AT in c(1:4)){
 dev.off()
 	
 	
-	
-#################################
-#	MULT FACTOR	CATCH 1 OR 5	#
-#################################
+#################################################
+#	MULT FACTOR	CATCH 1,5,10,25,50- FIGURE 3	#
+#################################################
 
-#What is the multiplication factor from catch one to catch five
-#This calculates the ratio of number of samples needed to catch 1 vs. 5 copies
+#What is the multiplication factor for catching different numbers of alleles?
+#This calculates the ratio of number of samples needed to catch 1 vs. 5 vs. 10 vs. 25 vs. 50
 #across the types of alleles and all scenarios
 pdf(file="mult_factor_boxplots.pdf",height=5,width=15)
 par(oma=c(5,3,3,3),mfrow=c(1,4),cex.axis=1.5,cex.lab=1.7,cex.main=1.7)
 boxplot(means_caught[,c(10,12,17,18)]/means_caught[,c(1,3,7,9)], names=1:4,main="5 copies",col="light grey"); abline(h=5,lty=2,col="salmon")
-
-#boxplot(c(means_caught[,c(10,12,17,18)]/means_caught[,c(1,3,7,9)]))
 boxplot(means_caught[,9+c(10,12,17,18)]/means_caught[,c(1,3,7,9)],main="10 copies", names=1:4,col="light grey"); abline(h=10,lty=2,col="salmon")
 boxplot(means_caught[,18+c(10,12,17,18)]/means_caught[,c(1,3,7,9)],main="25 copies", names=1:4,col="light grey"); abline(h=25,lty=2,col="salmon")
 boxplot(means_caught[,27+c(10,12,17,18)]/means_caught[,c(1,3,7,9)],main="50 copies", names=1:4,col="light grey"); abline(h=50,lty=2,col="salmon")
@@ -122,10 +139,20 @@ mtext("Category of allele", outer=T,side=1,line=-0.5,cex=1.2)
 mtext("size by which collection must be increased",outer=T,side=2,cex=1.2)
  mtext("number of allele copies desired in the collection",outer=T,side=3,cex=1.2)
 dev.off()
+
+#Calculations for reporting
 mean(means_caught[,c(10,12,17,18)]/means_caught[,c(1,3,7,9)],na.rm=T)	#4.16
 mean(means_caught[,9+c(10,12,17,18)]/means_caught[,c(1,3,7,9)],na.rm=T)		#7.19
 mean(means_caught[,18+c(10,12,17,18)]/means_caught[,c(1,3,7,9)],na.rm=T)	#15.8
 mean(means_caught[,27+c(10,12,17,18)]/means_caught[,c(1,3,7,9)],na.rm=T)	#27.4
+
+
+
+#################################################################################################
+
+#############################################################
+# EVERYTHING ELSE IS "CHECKS" TO MAKE SURE IT ALL WORKED	#
+#############################################################
 
 	
 #####################################
@@ -319,44 +346,3 @@ sd(c(all_res[,9,]))	#sd 2.67	2.47
 #YAYA it does conform to expectations of approximately 28 individuals
 
 	
-	
-#######################################
-#	POP SIZE AND MIGRATION COMBINED		#
-#######################################
-	
-	
-	sim_params[sim_params[,7]=="50",7]<-"0050";			sim_params[sim_params[,7]=="75",7]<-"0075";		sim_params[sim_params[,7]=="150",7]<-"0150"
-	sim_params[sim_params[,7]=="100",7]<-"0100";		sim_params[sim_params[,7]=="200",7]<-"0200";	sim_params[sim_params[,7]=="300",7]<-"0300"
-	sim_params[sim_params[,7]=="400",7]<-"0400";		sim_params[sim_params[,7]=="500",7]<-"0500";		
-
-	#This one for publication	
-	psize_mig<-paste("p=",sim_params[,7],"  m=0",sim_params[,5],sep="")
-	pdf("vary_migr_by_psize.pdf",height=6,width=13)
-	par(mar=c(10,5,3,2))
-	AT<-8; boxplot(means_caught[,AT]~psize_mig,las=2,col=c(rep("light grey",7),rep("white",7)),ylab="Nt, number of samples needed per population")
-	dev.off()
-	
-	sim_params_temp<-cbind(sim_params,paste(sim_params[,5],sim_params[,7],sep="-"))
-	pdf("vary_psize_by_migr.pdf",height=7,width=15)
-	for (AT in c(1,2,3,4,8,9)) boxplot(means_caught[,AT]~sim_params_temp[,8],las=2,main=allele_categories[AT])
-	dev.off()
-
-	
-	
-	sim_params_temp<-sim_params_temp[order(as.numeric(sim_params_temp[,7])),]
-	pdf(file="by_migr_rate.pdf")
-	boxplot(means_caught[197:245,4]~as.numeric(sim_params_temp[197:245,5]),las=2)	#assuming pop size = 200
-	dev.off()
-	sim_params_temp<-sim_params_temp[order(as.numeric(sim_params_temp[,5])),]
-	pdf(file="by_pop_size.pdf")
-	par(mfrow=c(1,2))
-	boxplot(means_caught[1:56,4]~as.numeric(sim_params_temp[1:56,7]),las=2) 	#assuming lowest migration rate of 0.000625
-	boxplot(means_caught[113:168,4]~as.numeric(sim_params_temp[113:168,7]),las=2)
-	dev.off()
-	#Note these differ by allele category
-	
-
-
-	
-	#revisit thresholds for local etc.
-	#looks like locally common it could be 5 to 10, globally not uncommon it is 10 to 25, globally rare but not super rare is 40 to 50
