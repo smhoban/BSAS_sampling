@@ -7,17 +7,20 @@
 		
 setwd("/home/user/Dropbox/Projects/IN_PROGRESS/Best_sampling_across_systems/")
 load("all_res_mult.Rdata")
-#Remember what is in these results!!!- this is the minumum sampling needed to capture 95% of the alleles in a given category
+#Remember the composition of the results matrix- this is the minumum sampling needed to capture 95% of the alleles 
+#with columns as the minimum needed in a given category
 #For example, once (cols 1:9), five times (cols 10:18), or 10 or 25 or 50 times 
+#	There are nine allele categories able to calculate (see below) even though only four are used in the paper
+#Rows are the scenarios (combinations of parameters)
 			
+#Some allele type/ parameter combinations have Inf/ NAs for many/ most replicates, which means that category not caught
 #This replaces all Inf values (never reached 0.95) with NAs
 is.na(all_res) <- sapply(all_res, is.infinite)
 means_caught<-apply(all_res[,,],c(1,2),mean,na.rm=T)
 #This will count the NAs- important to report!!!
-apply(is.na(all_res[,,]),c(1,2),sum)  
-#Most of those with bottleneck of 1 have most reps being Inf/ NAs for local common alleles meaning these just don't exist
+apply(is.na(all_res[,,]),c(1,2),sum)
 #run this and pull the params and then do table on that to see how many large/ small populations, bottleneck, migr etc.
-#i.e. which situations is it most likely.  Predicting large number of populations and high migration
+#i.e. which situations is it most likely
 apply(is.na(all_res[,,]),c(1,2),sum)[,3]>=15  
 
 
@@ -48,8 +51,8 @@ plot(sim_params[,7],means_caught[,2])
 #PDFs showing each factor for the four kinds of alleles- will reproduce Figure 1
 
 #Can do separately for the three kinds of bottlenecks by looking at rows for means_caught
-	#in the inner loop just paste in the 1:392 etc.
-	#into the below boxplot code to subset by bottleneck, otherwise will do across all bottlenecks
+	#in the inner loop just paste in 1:392 for rows of means_cause and sim_params etc.
+	#into the below boxplot code to subset by bottleneck, otherwise the code calculates across all bottlenecks
 	#and of course change the file output name to B1, B5, or B25 for bottleneck times
 	#These are the different bottleneck scenarios simulated... 
 	#B1 [1:392,]
@@ -82,7 +85,7 @@ dev.off()
 #	POP SIZE AND MIGRATION COMBINED- FIGURE 2				 #
 ##############################################################
 
-#The relatively flat boxplots for migration rate and population size suggest that these factors 
+#The relatively flat boxplots for migration rate and population size in Figure 1 suggest that these factors 
 #are dominated by the influence of number of populations which makes sense because the samples are 
 #divided up among the different populations 
 #So we need to parcel out these factors, to see if they have some influence
@@ -92,21 +95,22 @@ sim_params[sim_params[,7]=="50",7]<-"0050";			sim_params[sim_params[,7]=="75",7]
 sim_params[sim_params[,7]=="100",7]<-"0100";		sim_params[sim_params[,7]=="200",7]<-"0200";	sim_params[sim_params[,7]=="300",7]<-"0300"
 sim_params[sim_params[,7]=="400",7]<-"0400";		sim_params[sim_params[,7]=="500",7]<-"0500";		
 
-	#This one for publication- colored and focuses on local alleles	
+#This one for publication- focuses on local alleles, has grey for separating each population size
 psize_mig<-paste("p=",sim_params[,7],"  m=0",sim_params[,5],sep="")
 pdf("vary_migr_by_psize.pdf",height=6,width=13)
 par(mar=c(10,5,3,2))
 AT<-8; boxplot(means_caught[,AT]~psize_mig,las=2,col=c(rep("light grey",7),rep("white",7)),ylab="Nt, number of samples needed per population")
 dev.off()
 	
-	#This one NOT for publication	
+	#This one NOT for publication- has separate page for each allele category- just for examining
 sim_params_temp<-cbind(sim_params,paste(sim_params[,5],sim_params[,7],sep="-"))
 pdf("vary_psize_by_migr.pdf",height=7,width=15)
 for (AT in c(1,2,3,4,8,9)) boxplot(means_caught[,AT]~sim_params_temp[,8],las=2,main=allele_categories[AT])
 dev.off()
 
-	#This one NOT for publication	
-	#The following focus on number of populations (i.e. there are separate graphs for each number of populations)
+#This one NOT for publication-  focus on number of populations (i.e. there are separate graphs for each number of populations)
+#To show large variation is due of course to number of populations 
+#but not a very helpful set of plots
 #Change the 7 to a 5 to vary by migration rate
 #Change the AT for Allele Type (could look at any alleles or catch multiple)
 
@@ -126,7 +130,7 @@ dev.off()
 #################################################
 
 #What is the multiplication factor for catching different numbers of alleles?
-#This calculates the ratio of number of samples needed to catch 1 vs. 5 vs. 10 vs. 25 vs. 50
+#In other words what is the ratio of number of samples needed to catch 1 vs. 5 (or vs. 10 or 25 or 50)
 #across the types of alleles and all scenarios
 pdf(file="mult_factor_boxplots.pdf",height=5,width=15)
 par(oma=c(5,3,3,3),mfrow=c(1,4),cex.axis=1.5,cex.lab=1.7,cex.main=1.7)
@@ -161,7 +165,7 @@ mean(means_caught[,27+c(10,12,17,18)]/means_caught[,c(1,3,7,9)],na.rm=T)	#27.4
 #At first it seems surprising that the bottleneck length had so little effect on sampling 
 #In spite of the known effect of bottlenecks on number of alleles 	
 #To make sure they worked, look at bottlenecks and migration examine genepop files 
-#Calculate NUMB ALLELES and OBS HET over 10 reps, compare among bnecks
+#Calculate NUMB ALLELES and OBS HET over 10 reps, compare among bnecks, for 12 random scenarios
 
  setwd("/home/user/Dropbox/Projects/IN_PROGRESS/Best_sampling_across_systems/")
  load("all_res_final.Rdata")
@@ -169,13 +173,17 @@ mean(means_caught[,27+c(10,12,17,18)]/means_caught[,c(1,3,7,9)],na.rm=T)	#27.4
  scenarios_ran<-list.dirs(path = "./Simulations6/", full.names = TRUE,recursive=F)
 
 #index 1,393,785 is the first scenario for the three bottlenecks
-#Will go through 12 random scenarios 
 bneck_nall<-array(dim=c(3,12,10)); bneck_het<-array(dim=c(3,12,10))
 bneck_base<-c(1,393,785); bneck_add<-seq(1,300,25)
 #The 12 scenarios are:
-#b1LBSAS_Np_10_mim_005_Ps_100	b1LBSAS_Np_10_mim_04_Ps_1000	b1LBSAS_Np_14_mim_0025_Ps_150	
-#b1LBSAS_Np_14_mim_02_Ps_200		b1LBSAS_Np_20_mim_00125_Ps_300	b1LBSAS_Np_20_mim_01_Ps_50
-#b1LBSAS_Np_2_mim_000625_Ps_500	b1LBSAS_Np_2_mim_005_Ps_75		b1LBSAS_Np_3_mim_000625_Ps_100
+# scenarios_ran[bneck_add]
+# [1] "./Simulations6//b1LBSAS_Np_10_mim_000625_Ps_100" 	[2] "./Simulations6//b1LBSAS_Np_10_mim_005_Ps_1000"
+# [3] "./Simulations6//b1LBSAS_Np_10_mim_04_Ps_150"		 	[4] "./Simulations6//b1LBSAS_Np_14_mim_0025_Ps_200"
+# [5] "./Simulations6//b1LBSAS_Np_14_mim_02_Ps_300"			[6] "./Simulations6//b1LBSAS_Np_20_mim_00125_Ps_50"
+# [7] "./Simulations6//b1LBSAS_Np_20_mim_01_Ps_500"			[8] "./Simulations6//b1LBSAS_Np_2_mim_000625_Ps_75"
+# [9] "./Simulations6//b1LBSAS_Np_2_mim_01_Ps_100"			[10] "./Simulations6//b1LBSAS_Np_3_mim_000625_Ps_1000"
+# [11] "./Simulations6//b1LBSAS_Np_3_mim_005_Ps_150"		[12] "./Simulations6//b1LBSAS_Np_3_mim_04_Ps_200"
+
 
 for (b in 1:3){
 	for (add in 1:12){
@@ -189,7 +197,7 @@ for (b in 1:3){
 			bneck_nall[b,add,r]<-mean(unlist(summary(BSAS_genind)[4]))
 			bneck_het[b,add,r]<-mean(unlist(summary(BSAS_genind)[6]))
 }	}	}
-#RESULTS: These plots will show the ratio of non bottleneck to bottleneck- we can see it ranges 
+#RESULTS: These plots show the ratio of non bottleneck to bottleneck- we can see it ranges 
 #Thus the bottlenecks are having an effect on genetic diversity 
 #Explanation is that bottlenecks only cause the loss of (mostly) rare alleles and those are likely
 #below the threshold we are counting
@@ -213,7 +221,7 @@ get_params<- function(scenario) strsplit(strsplit(scenario,"/")[[1]][4],"_")
 scenarios_ran<-list.dirs(path = "./mss_migr_model/", full.names = TRUE,recursive=F) 
 load("all_res_mss.Rdata")
 #Remember what is in these results- this is the minumum sampling needed to capture 95% of the alleles in a given category
-#Either once (cols 1:9) or five times (cols 10:18) 
+#Either once (cols 1:9) or five times (cols 10:18) ... etc.
 is.na(all_res) <- sapply(all_res, is.infinite)
 means_caught_mss<-round(apply(all_res[,,],c(1,2),mean,na.rm=T),2)
 sd_caught_mss<-apply(all_res[1:16,8,],1,sd,na.rm=T)	
@@ -253,10 +261,11 @@ boxplot(diff_mss[,3]~as.numeric(sim_params_mss[,7]))					#difference is highest 
 	mean(as.numeric(a[,1])); mean(as.numeric(a[,2]))
 	
 	
-#####################################
-#	TO LOOK AT SINGLETONS			#
-	#################################
+#############################################################
+#	TO COUNT NUMBER OF SINGLETONS FOR DISCUSSION			#
+	#########################################################
 
+#To count the number of alleles occurring only once or twice in a sample and thus likely to be lost
 
 library(adegenet); library(diveRsity)
 source("sample_funcs_BSAS.R"); source("src/arp2gen_edit.R")
@@ -265,13 +274,6 @@ colMax <- function(data) sapply(data, max, na.rm = TRUE)
 setwd("/home/user/Dropbox/Projects/IN_PROGRESS/Best_sampling_across_systems/Additional_checks/onep_no_bn/nob5LBSAS_Np_1_Ps_1000/")
 
 BSAS_genind<-read.genepop("nob5LBSAS_Np_1_Ps_500_1_3.gen",ncode=3)
-BSAS_genpop<-genind2genpop(BSAS_genind)
-
-n_total_indivs<- length(BSAS_genind@tab[,1])
-n_ind_p_pop<-table(BSAS_genind@pop)
-allele_freqs<-colSums(BSAS_genpop@tab)/(n_total_indivs*2)	
-
-allele_cat<-get.allele.cat(BSAS_genpop,  n_ind_p_pop,local=F)	
 
 sum(colSums(BSAS_genind@tab[sample(1:nrow(BSAS_genind@tab), 500),])==1)
 sum(colSums(BSAS_genind@tab[sample(1:nrow(BSAS_genind@tab), 500),])==0)
@@ -290,6 +292,7 @@ hist(colSums(BSAS_genind@tab[sample(1:nrow(BSAS_genind@tab), 500),]),breaks=c(0,
 #a lot across the range of migration rates, as the populations are already quite small
 #In small populations the population size will have more influence on drift than migr!
 #(Also, again, some rare alleles might be lost or shared due to migration but we're ignoring rare alleles)
+#To report migration rate in the results also
 
  library(hierfstat)
  pops_focus<-c("50","100","300","500")
@@ -316,8 +319,6 @@ for (pnum in c("2","3","5","10")){
 #################################
 #	ANALYZING ONE POPS			#
 #################################
-	#first run the same code run on the multiple populations to count alleles caught
-this_b<-1
 setwd("/home/user/Dropbox/Projects/IN_PROGRESS/Best_sampling_across_systems/Additional_checks")
 
 #set up the params list
@@ -333,18 +334,17 @@ means_caught<-apply(all_res[,,],c(1,2),mean,na.rm=T)
 boxplot(means_caught[,c(1,3,9)],ylim=c(0,250),ylab="number plants to sample", names=c("all","low fr","0.05"),main="no bottleneck, 1 population")
 axis(side=4,at=c(0,50,100,150,200,250),labels=F); 	mtext("allele category",side=1,line=3,cex=1.3)
 dev.off()
-	
-	
-#BIG RESULT 
-boxplot(means_caught[,10:18]/means_caught[,1:9])
-	#no bn then bn
-mean(means_caught[,10:18]/means_caught[,1:9],na.rm=T)
-#[1] 4.824	[1] 4.136
 
+#For reporting, one population, for BM, compare to theoretical expecations
 
-	#no bn then bn
 summary(c(all_res[,9,])) #mean of 27.39 median of 28;	mean of 27.9 median of 29	
 sd(c(all_res[,9,]))	#sd 2.67	2.47
-#YAYA it does conform to expectations of approximately 28 individuals
+#good, it does conform to expectations of approximately 28 individuals
+
+#and the ratio
+mean(means_caught[,10:18]/means_caught[,1:9],na.rm=T)
+#no bn then bn		#[1] 4.824	[1] 4.136
+
+
 
 	
