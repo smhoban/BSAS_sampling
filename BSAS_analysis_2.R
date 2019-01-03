@@ -336,14 +336,14 @@ axis(side=4,at=c(0,50,100,150,200,250),labels=F); 	mtext("allele category",side=
 dev.off()
 
 #For reporting, one population, for BM, compare to theoretical expecations
-
 summary(c(all_res[,9,])) #mean of 27.39 median of 28;	mean of 27.9 median of 29	
 sd(c(all_res[,9,]))	#sd 2.67	2.47
 #good, it does conform to expectations of approximately 28 individuals
 
-#and the ratio
+#and the ratio- the "big result" of the paper in terms of capturing multiple alleles- in this case five copies
 mean(means_caught[,10:18]/means_caught[,1:9],na.rm=T)
 #no bn then bn		#[1] 4.824	[1] 4.136
+boxplot(means_caught[,10:18]/means_caught[,1:9])
 
 
 
