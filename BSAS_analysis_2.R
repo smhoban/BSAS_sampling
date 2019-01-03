@@ -8,7 +8,7 @@
 setwd("/home/user/Dropbox/Projects/IN_PROGRESS/Best_sampling_across_systems/")
 load("all_res_mult.Rdata")
 #Remember what is in these results!!!- this is the minumum sampling needed to capture 95% of the alleles in a given category
-#Either once (cols 1:9) or five times (cols 10:18), or 10 or 25 or 50 times 
+#For example, once (cols 1:9), five times (cols 10:18), or 10 or 25 or 50 times 
 			
 #This replaces all Inf values (never reached 0.95) with NAs
 is.na(all_res) <- sapply(all_res, is.infinite)
