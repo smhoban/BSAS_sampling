@@ -42,7 +42,8 @@ summary(lm(sim_params[,3],means_caught[,2]))
 plot(sim_params[,5],means_caught[,2])
 plot(sim_params[,7],means_caught[,2])
 	
-	
+#Or
+#sim_params<-read.csv("sim_params.csv")[,-1]	
 	
 #####################################################
 #	FIGURE 1 AND SUPP PLOTS- GRID ALL PARAMS		#
@@ -97,7 +98,7 @@ sim_params[sim_params[,7]==400,7]<-" 400";		sim_params[sim_params[,7]==500,7]<-"
 
 #This one for publication- focuses on local alleles, has grey for separating each population size
 psize_mig<-paste("p=",sim_params[,7],"  m=",sim_params[,5],sep="")
-pdf("vary_migr_by_psize.pdf",height=6,width=13)
+pdf("vary_migr_by_psize.pdf",height=6,width=12)
 par(mar=c(10,5,3,2))
 AT<-8; boxplot(means_caught[,AT]~psize_mig,las=2,col=c(rep("light grey",7),rep("white",7)),ylab="Ni, number of individuals to sample per population")
 dev.off()
